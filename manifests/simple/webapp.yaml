@@ -4,7 +4,7 @@ metadata:
   name: webapp
   labels:
     app: webpp
-    test: yes
+    test: "yes"
 spec:
   replicas: 2
   selector:
