@@ -30,3 +30,6 @@ jobs:
         run: |
           ls -Rt
           pwd
+
+      - name: ansible install some stuff
+        run: ansible-playbook ./.github/workflows/install-tools.yaml
