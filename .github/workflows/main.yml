@@ -35,7 +35,7 @@ jobs:
         run: ansible-playbook ./playbooks/install-tools.yaml
 
       - name: run kubeval
-        run: kubeval -d ./manifests
+        run: kubeval --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master -d ./manifests
 
       - name: run polaris audit
         run: polaris audit --format pretty --audit-path ./manifests
