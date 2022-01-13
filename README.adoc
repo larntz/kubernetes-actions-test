@@ -1,0 +1,3 @@
+= README
+
+Repo for testing github actions. The goal is to validate and lint kubernetes manifests generated with helm or kustomize. 
