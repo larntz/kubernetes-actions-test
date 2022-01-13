@@ -1,4 +1,3 @@
----
 # Source: loki-stack/charts/loki/templates/podsecuritypolicy.yaml
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
@@ -10,35 +9,35 @@ metadata:
     heritage: Helm
     release: loki-stack
 spec:
-  privileged: false
-  allowPrivilegeEscalation: false
-  volumes:
-    - 'configMap'
-    - 'emptyDir'
-    - 'persistentVolumeClaim'
-    - 'secret'
-    - 'projected'
-    - 'downwardAPI'
   hostNetwork: false
-  hostIPC: false
   hostPID: false
+  hostIPC: false
+  volumes:
+  - 'configMap'
+  - 'emptyDir'
+  - 'persistentVolumeClaim'
+  - 'secret'
+  - 'projected'
+  - 'downwardAPI'
+  allowPrivilegeEscalation: false
+  fsGroup:
+    ranges:
+    - max: 65535
+      min: 1
+    rule: 'MustRunAs'
+  privileged: false
+  readOnlyRootFilesystem: true
+  requiredDropCapabilities:
+  - ALL
   runAsUser:
     rule: 'MustRunAsNonRoot'
   seLinux:
     rule: 'RunAsAny'
   supplementalGroups:
-    rule: 'MustRunAs'
     ranges:
-    - min: 1
-      max: 65535
-  fsGroup:
+    - max: 65535
+      min: 1
     rule: 'MustRunAs'
-    ranges:
-    - min: 1
-      max: 65535
-  readOnlyRootFilesystem: true
-  requiredDropCapabilities:
-    - ALL
 ---
 # Source: loki-stack/charts/promtail/templates/podsecuritypolicy.yaml
 apiVersion: policy/v1beta1
@@ -51,12 +50,19 @@ metadata:
     heritage: Helm
     release: loki-stack
 spec:
+  hostNetwork: false
+  hostPID: false
+  hostIPC: false
+  volumes:
+  - secret
+  - configMap
+  - hostPath
+  - projected
+  - downwardAPI
+  - emptyDir
   allowPrivilegeEscalation: false
   fsGroup:
     rule: RunAsAny
-  hostIPC: false
-  hostNetwork: false
-  hostPID: false
   privileged: false
   readOnlyRootFilesystem: true
   requiredDropCapabilities:
@@ -67,40 +73,31 @@ spec:
     rule: RunAsAny
   supplementalGroups:
     rule: RunAsAny
-  volumes:
-  - secret
-  - configMap
-  - hostPath
-  - projected
-  - downwardAPI
-  - emptyDir
 ---
 # Source: loki-stack/charts/loki/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  name: loki-stack
+  namespace: default
   labels:
     app: loki
     chart: loki-2.8.4
     heritage: Helm
     release: loki-stack
-  annotations:
-    {}
-  name: loki-stack
-  namespace: default
 automountServiceAccountToken: true
 ---
 # Source: loki-stack/charts/promtail/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  name: loki-stack-promtail
+  namespace: default
   labels:
     app: promtail
     chart: promtail-2.2.0
     heritage: Helm
     release: loki-stack
-  name: loki-stack-promtail
-  namespace: default
 ---
 # Source: loki-stack/charts/loki/templates/secret.yaml
 apiVersion: v1
@@ -111,8 +108,8 @@ metadata:
   labels:
     app: loki
     chart: loki-2.8.4
-    release: loki-stack
     heritage: Helm
+    release: loki-stack
 data:
   loki.yaml: YXV0aF9lbmFibGVkOiBmYWxzZQpjaHVua19zdG9yZV9jb25maWc6CiAgbWF4X2xvb2tfYmFja19wZXJpb2Q6IDBzCmNvbXBhY3RvcjoKICBzaGFyZWRfc3RvcmU6IGZpbGVzeXN0ZW0KICB3b3JraW5nX2RpcmVjdG9yeTogL2RhdGEvbG9raS9ib2x0ZGItc2hpcHBlci1jb21wYWN0b3IKaW5nZXN0ZXI6CiAgY2h1bmtfYmxvY2tfc2l6ZTogMjYyMTQ0CiAgY2h1bmtfaWRsZV9wZXJpb2Q6IDNtCiAgY2h1bmtfcmV0YWluX3BlcmlvZDogMW0KICBsaWZlY3ljbGVyOgogICAgcmluZzoKICAgICAga3ZzdG9yZToKICAgICAgICBzdG9yZTogaW5tZW1vcnkKICAgICAgcmVwbGljYXRpb25fZmFjdG9yOiAxCiAgbWF4X3RyYW5zZmVyX3JldHJpZXM6IDAKICB3YWw6CiAgICBkaXI6IC9kYXRhL2xva2kvd2FsCmxpbWl0c19jb25maWc6CiAgZW5mb3JjZV9tZXRyaWNfbmFtZTogZmFsc2UKICByZWplY3Rfb2xkX3NhbXBsZXM6IHRydWUKICByZWplY3Rfb2xkX3NhbXBsZXNfbWF4X2FnZTogMTY4aApzY2hlbWFfY29uZmlnOgogIGNvbmZpZ3M6CiAgLSBmcm9tOiAiMjAyMC0xMC0yNCIKICAgIGluZGV4OgogICAgICBwZXJpb2Q6IDI0aAogICAgICBwcmVmaXg6IGluZGV4XwogICAgb2JqZWN0X3N0b3JlOiBmaWxlc3lzdGVtCiAgICBzY2hlbWE6IHYxMQogICAgc3RvcmU6IGJvbHRkYi1zaGlwcGVyCnNlcnZlcjoKICBodHRwX2xpc3Rlbl9wb3J0OiAzMTAwCnN0b3JhZ2VfY29uZmlnOgogIGJvbHRkYl9zaGlwcGVyOgogICAgYWN0aXZlX2luZGV4X2RpcmVjdG9yeTogL2RhdGEvbG9raS9ib2x0ZGItc2hpcHBlci1hY3RpdmUKICAgIGNhY2hlX2xvY2F0aW9uOiAvZGF0YS9sb2tpL2JvbHRkYi1zaGlwcGVyLWNhY2hlCiAgICBjYWNoZV90dGw6IDI0aAogICAgc2hhcmVkX3N0b3JlOiBmaWxlc3lzdGVtCiAgZmlsZXN5c3RlbToKICAgIGRpcmVjdG9yeTogL2RhdGEvbG9raS9jaHVua3MKdGFibGVfbWFuYWdlcjoKICByZXRlbnRpb25fZGVsZXRlc19lbmFibGVkOiBmYWxzZQogIHJldGVudGlvbl9wZXJpb2Q6IDBz
 ---
@@ -125,8 +122,8 @@ metadata:
   labels:
     app: promtail
     chart: promtail-2.2.0
-    release: loki-stack
     heritage: Helm
+    release: loki-stack
 data:
   promtail.yaml: |
     client:
@@ -401,9 +398,9 @@ metadata:
   labels:
     app: loki-stack
     chart: loki-stack-2.5.1
-    release: loki-stack
-    heritage: Helm
     grafana_datasource: "1"
+    heritage: Helm
+    release: loki-stack
 data:
   loki-stack-datasource.yaml: |-
     apiVersion: 1
@@ -422,8 +419,8 @@ metadata:
   labels:
     app: loki-stack
     chart: loki-stack-2.5.1
-    release: loki-stack
     heritage: Helm
+    release: loki-stack
 data:
   test.sh: |
     #!/usr/bin/env bash
@@ -467,44 +464,44 @@ data:
       jq -e '.streams[].entries[].line == "foobar"'
     }
 ---
+apiVersion: rbac.authorization.k8s.io/v1
 # Source: loki-stack/charts/promtail/templates/clusterrole.yaml
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
 metadata:
+  name: loki-stack-promtail-clusterrole
   labels:
     app: promtail
     chart: promtail-2.2.0
-    release: loki-stack
     heritage: Helm
-  name: loki-stack-promtail-clusterrole
+    release: loki-stack
 rules:
-- apiGroups: [""] # "" indicates the core API group
-  resources:
+- resources:
   - nodes
   - nodes/proxy
   - services
   - endpoints
   - pods
+  apiGroups: [""] # "" indicates the core API group
   verbs: ["get", "watch", "list"]
 ---
+apiVersion: rbac.authorization.k8s.io/v1
 # Source: loki-stack/charts/promtail/templates/clusterrolebinding.yaml
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: loki-stack-promtail-clusterrolebinding
   labels:
     app: promtail
     chart: promtail-2.2.0
-    release: loki-stack
     heritage: Helm
-subjects:
-  - kind: ServiceAccount
-    name: loki-stack-promtail
-    namespace: default
+    release: loki-stack
 roleRef:
-  kind: ClusterRole
   name: loki-stack-promtail-clusterrole
+  kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io
+subjects:
+- name: loki-stack-promtail
+  namespace: default
+  kind: ServiceAccount
 ---
 # Source: loki-stack/charts/loki/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -518,10 +515,10 @@ metadata:
     heritage: Helm
     release: loki-stack
 rules:
-- apiGroups:      ['extensions']
-  resources:      ['podsecuritypolicies']
-  verbs:          ['use']
-  resourceNames:  [loki-stack]
+- resources: ['podsecuritypolicies']
+  apiGroups: ['extensions']
+  resourceNames: [loki-stack]
+  verbs: ['use']
 ---
 # Source: loki-stack/charts/promtail/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -535,10 +532,10 @@ metadata:
     heritage: Helm
     release: loki-stack
 rules:
-- apiGroups:      ['extensions']
-  resources:      ['podsecuritypolicies']
-  verbs:          ['use']
-  resourceNames:  [loki-stack-promtail]
+- resources: ['podsecuritypolicies']
+  apiGroups: ['extensions']
+  resourceNames: [loki-stack-promtail]
+  verbs: ['use']
 ---
 # Source: loki-stack/charts/loki/templates/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -552,12 +549,12 @@ metadata:
     heritage: Helm
     release: loki-stack
 roleRef:
-  apiGroup: rbac.authorization.k8s.io
+  name: loki-stack
   kind: Role
-  name: loki-stack
+  apiGroup: rbac.authorization.k8s.io
 subjects:
-- kind: ServiceAccount
-  name: loki-stack
+- name: loki-stack
+  kind: ServiceAccount
 ---
 # Source: loki-stack/charts/promtail/templates/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -571,12 +568,12 @@ metadata:
     heritage: Helm
     release: loki-stack
 roleRef:
-  apiGroup: rbac.authorization.k8s.io
+  name: loki-stack-promtail
   kind: Role
-  name: loki-stack-promtail
+  apiGroup: rbac.authorization.k8s.io
 subjects:
-- kind: ServiceAccount
-  name: loki-stack-promtail
+- name: loki-stack-promtail
+  kind: ServiceAccount
 ---
 # Source: loki-stack/charts/loki/templates/service-headless.yaml
 apiVersion: v1
@@ -587,19 +584,19 @@ metadata:
   labels:
     app: loki
     chart: loki-2.8.4
-    release: loki-stack
     heritage: Helm
+    release: loki-stack
     variant: headless
 spec:
-  clusterIP: None
-  ports:
-    - port: 3100
-      protocol: TCP
-      name: http-metrics
-      targetPort: http-metrics
   selector:
     app: loki
     release: loki-stack
+  ports:
+  - name: http-metrics
+    protocol: TCP
+    port: 3100
+    targetPort: http-metrics
+  clusterIP: None
 ---
 # Source: loki-stack/charts/loki/templates/service.yaml
 apiVersion: v1
@@ -610,20 +607,18 @@ metadata:
   labels:
     app: loki
     chart: loki-2.8.4
-    release: loki-stack
     heritage: Helm
-  annotations:
-    {}
+    release: loki-stack
 spec:
   type: ClusterIP
-  ports:
-    - port: 3100
-      protocol: TCP
-      name: http-metrics
-      targetPort: http-metrics
   selector:
     app: loki
     release: loki-stack
+  ports:
+  - name: http-metrics
+    protocol: TCP
+    port: 3100
+    targetPort: http-metrics
 ---
 # Source: loki-stack/charts/promtail/templates/daemonset.yaml
 apiVersion: apps/v1
@@ -634,17 +629,13 @@ metadata:
   labels:
     app: promtail
     chart: promtail-2.2.0
-    release: loki-stack
     heritage: Helm
-  annotations:
-    {}
+    release: loki-stack
 spec:
   selector:
     matchLabels:
       app: promtail
       release: loki-stack
-  updateStrategy:
-    {}
   template:
     metadata:
       labels:
@@ -656,68 +647,66 @@ spec:
         prometheus.io/scrape: "true"
     spec:
       serviceAccountName: loki-stack-promtail
+      nodeSelector: {}
       containers:
-        - name: promtail
-          image: "grafana/promtail:2.1.0"
-          imagePullPolicy: IfNotPresent
-          args:
-            - "-config.file=/etc/promtail/promtail.yaml"
-            - "-client.url=http://loki-stack:3100/loki/api/v1/push"
-          volumeMounts:
-            - name: config
-              mountPath: /etc/promtail
-            - name: run
-              mountPath: /run/promtail
-            - mountPath: /var/lib/docker/containers
-              name: docker
-              readOnly: true
-            - mountPath: /var/log/pods
-              name: pods
-              readOnly: true
-          env:
-            - name: HOSTNAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-          ports:
-            - containerPort: 3101
-              name: http-metrics
-          securityContext:
-            readOnlyRootFilesystem: true
-            runAsGroup: 0
-            runAsUser: 0
-          readinessProbe:
-            failureThreshold: 5
-            httpGet:
-              path: /ready
-              port: http-metrics
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 1
-          resources:
-            {}
-      nodeSelector:
-        {}
-      affinity:
-        {}
-      tolerations:
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/master
-          operator: Exists
-      volumes:
+      - name: promtail
+        image: "grafana/promtail:2.1.0"
+        args:
+        - "-config.file=/etc/promtail/promtail.yaml"
+        - "-client.url=http://loki-stack:3100/loki/api/v1/push"
+        ports:
+        - name: http-metrics
+          containerPort: 3101
+        env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        resources: {}
+        volumeMounts:
         - name: config
-          configMap:
-            name: loki-stack-promtail
+          mountPath: /etc/promtail
         - name: run
-          hostPath:
-            path: /run/promtail
-        - hostPath:
-            path: /var/lib/docker/containers
-          name: docker
-        - hostPath:
-            path: /var/log/pods
-          name: pods
+          mountPath: /run/promtail
+        - name: docker
+          readOnly: true
+          mountPath: /var/lib/docker/containers
+        - name: pods
+          readOnly: true
+          mountPath: /var/log/pods
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            port: http-metrics
+            path: /ready
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsGroup: 0
+          runAsUser: 0
+      volumes:
+      - name: config
+        configMap:
+          name: loki-stack-promtail
+      - name: run
+        hostPath:
+          path: /run/promtail
+      - name: docker
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: pods
+        hostPath:
+          path: /var/log/pods
+      affinity: {}
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+  updateStrategy: {}
 ---
 # Source: loki-stack/charts/loki/templates/statefulset.yaml
 apiVersion: apps/v1
@@ -728,97 +717,91 @@ metadata:
   labels:
     app: loki
     chart: loki-2.8.4
-    release: loki-stack
     heritage: Helm
-  annotations:
-    {}
+    release: loki-stack
 spec:
-  podManagementPolicy: OrderedReady
   replicas: 1
   selector:
     matchLabels:
       app: loki
       release: loki-stack
-  serviceName: loki-stack-headless
-  updateStrategy:
-    type: RollingUpdate
   template:
     metadata:
       labels:
-        app: loki
         name: loki
+        app: loki
         release: loki-stack
       annotations:
         checksum/config: 2261f173709deaf02b1b178d8345c814b507e24a40900e7f0238152ef2d1bfdd
         prometheus.io/port: http-metrics
         prometheus.io/scrape: "true"
     spec:
+      terminationGracePeriodSeconds: 4800
       serviceAccountName: loki-stack
+      nodeSelector: {}
+      initContainers: []
+      containers:
+      - name: loki
+        image: "grafana/loki:2.4.1"
+        args:
+        - "-config.file=/etc/loki/loki.yaml"
+        ports:
+        - name: http-metrics
+          protocol: TCP
+          containerPort: 3100
+        env:
+        resources: {}
+        volumeMounts:
+        - name: config
+          mountPath: /etc/loki
+        - name: storage
+          mountPath: "/data"
+          subPath:
+        livenessProbe:
+          httpGet:
+            port: http-metrics
+            path: /ready
+          initialDelaySeconds: 45
+        readinessProbe:
+          httpGet:
+            port: http-metrics
+            path: /ready
+          initialDelaySeconds: 45
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          readOnlyRootFilesystem: true
+      volumes:
+      - name: config
+        secret:
+          secretName: loki-stack
+      - name: storage
+        emptyDir: {}
+      affinity: {}
+      tolerations: []
       securityContext:
         fsGroup: 10001
         runAsGroup: 10001
         runAsNonRoot: true
         runAsUser: 10001
-      initContainers:
-        []
-      containers:
-        - name: loki
-          image: "grafana/loki:2.4.1"
-          imagePullPolicy: IfNotPresent
-          args:
-            - "-config.file=/etc/loki/loki.yaml"
-          volumeMounts:
-            - name: config
-              mountPath: /etc/loki
-            - name: storage
-              mountPath: "/data"
-              subPath: 
-          ports:
-            - name: http-metrics
-              containerPort: 3100
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /ready
-              port: http-metrics
-            initialDelaySeconds: 45
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: http-metrics
-            initialDelaySeconds: 45
-          resources:
-            {}
-          securityContext:
-            readOnlyRootFilesystem: true
-          env:
-      nodeSelector:
-        {}
-      affinity:
-        {}
-      tolerations:
-        []
-      terminationGracePeriodSeconds: 4800
-      volumes:
-        - name: config
-          secret:
-            secretName: loki-stack
-        - name: storage
-          emptyDir: {}
+  serviceName: loki-stack-headless
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
 ---
 # Source: loki-stack/templates/tests/loki-test-pod.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  annotations:
-    "helm.sh/hook": test-success
+  name: loki-stack-test
   labels:
     app: loki-stack
     chart: loki-stack-2.5.1
-    release: loki-stack
     heritage: Helm
-  name: loki-stack-test
+    release: loki-stack
+  annotations:
+    "helm.sh/hook": test-success
 spec:
+  restartPolicy: Never
   containers:
   - name: test
     image: bats/bats:v1.1.0
@@ -832,7 +815,6 @@ spec:
     volumeMounts:
     - name: tests
       mountPath: /var/lib/loki
-  restartPolicy: Never
   volumes:
   - name: tests
     configMap:
