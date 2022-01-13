@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Kubernetes Validator 
 
 # Controls when the workflow will run
 on:
@@ -31,5 +31,5 @@ jobs:
           ls -Rt
           pwd
 
-      - name: ansible install some stuff
+      - name: ansible install some tools
         run: ansible-playbook ./playbooks/install-tools.yaml
