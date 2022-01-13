@@ -32,4 +32,4 @@ jobs:
           pwd
 
       - name: ansible install some stuff
-        run: ansible-playbook ./.github/workflows/install-tools.yaml
+        run: ansible-playbook ./playbooks/install-tools.yaml
