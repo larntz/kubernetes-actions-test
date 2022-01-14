@@ -31,7 +31,7 @@ jobs:
         run: ls -Rt
 
       - name: git stuff
-        run: git diff --name-only main..${{ github.head_ref }}
+        run: git diff --name-only main ${{ github.head_ref }}
 
       - name: ansible install some tools
         # install tools 
