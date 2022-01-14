@@ -96,7 +96,7 @@ jobs:
 
       - name: try kustomize
         run: |
-          COUNT=$(git log --oneline HEAD ^main | wc -l)
+          COUNT=$(git log --oneline HEAD ^refs/remotes/origin/main  | wc -l)
           git diff HEAD..HEAD~$COUNT --name-only
 
 
