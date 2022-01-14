@@ -94,13 +94,10 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Test Clone
-        run: git clone git@github.com:Chris-Carmichael/kustomize-remote.git
+      - name: try kustomize
+        run: |
+          COUNT=$(git log --oneline HEAD ^main | wc -l)
+          git diff HEAD..HEAD~$COUNT --name-only
 
-      - name: kz-check
-        uses: 'anarcher/kustomize-check-action@master'
-          # with:
-          # paths is optional. when changes are in this paths, check-action do check it.
-          #paths: |
-          #    base/
-          #    overlay/
+
+
