@@ -5,7 +5,7 @@ metadata:
   labels:
     app: webpp
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
       app: webapp
@@ -35,10 +35,10 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: webapp
+  namez: webapp
 spec:
   rules:
-  - host: "webapp.127.0.0.1.nip.io"
+  - host:               "webapp.127.0.0.1.nip.io"
     http:
       paths:
       - backend:
