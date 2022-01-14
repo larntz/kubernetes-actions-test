@@ -6,7 +6,7 @@ metadata:
     app: webpp
     test: "yes"
 spec:
-  replicas: 2
+  replicas: 200
   selector:
     matchLabels:
       app: webapp
