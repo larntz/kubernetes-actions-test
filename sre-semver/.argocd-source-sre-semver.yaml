@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - 221643344216.dkr.ecr.us-east-1.amazonaws.com/sre-semver:0.0.6

@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ssh://git@github.com:Chris-Carmichael/kustomize-remote.git//sre-test/sre-semver/base
+
+commonLabels:
+  owner: sre-team
+  environment: dev
+
+namespace: sre-semver
+
+images:
+  - name: ecr/sre-semver
+    newTag: 0.0.2

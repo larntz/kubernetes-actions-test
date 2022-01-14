@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - ecr/sre-sha=221643344216.dkr.ecr.us-east-1.amazonaws.com/sre-sha:v1.0.2_3c3cc3c3
