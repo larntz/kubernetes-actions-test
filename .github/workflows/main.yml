@@ -56,12 +56,12 @@ jobs:
       - name: run kubeval
         # validation
         if: always()
-        run: kubeval --strict --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master -d ./manifests
+        run: kubeval --ignored-filename-patterns kustomization.yaml --strict --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master -d ./manifests
 
       - name: run kubeconform
         # validation
         if: always()
-        run: kubeconform -strict -summary manifests/
+        run: kubeconform -ignore-filename-pattern kustomization.yaml -strict -summary manifests/
 
       - name: run polaris audit
         # best practice & security audit
