@@ -94,10 +94,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: try kustomize
-        run: |
-          COUNT=$(git log --oneline HEAD ^refs/remotes/origin/main  | wc -l)
-          git diff HEAD..HEAD~$COUNT --name-only
+      - name: try kustomizing
+        run: ./scripts/kustomize-build.sh
+
+        #run: |
+        #  COUNT=$(git log --oneline HEAD ^refs/remotes/origin/main  | wc -l)
+        #  git diff HEAD..HEAD~$COUNT --name-only
 
 
 
