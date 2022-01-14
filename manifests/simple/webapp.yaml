@@ -8,7 +8,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: webapp
+        app: webapp
   template:
     metadata:
       labels:
@@ -25,7 +25,7 @@ kind: Service
 metadata:
   name: webapp
 spec:
-  selector:
+  selectors:
     app: webapp
   ports:
   - protocol: TCP
