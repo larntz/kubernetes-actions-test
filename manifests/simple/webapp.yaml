@@ -3,8 +3,7 @@ kind: Deployment
 metadata:
   name: webapp
   labels:
-    app: webpp
-    test: "yes"
+   app: webpp
 spec:
   replicas: 200
   selector:
