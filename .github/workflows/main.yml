@@ -56,12 +56,12 @@ jobs:
       - name: run kubeval
         # validation
         if: always()
-        run: kubeval --strict --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master -d ./manifests
+        run: kubeval --ignored-filename-patterns "kustomization.yaml",".argocd\S+" --strict --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master -d ./manifests
 
       - name: run kubeconform
         # validation
         if: always()
-        run: kubeconform -strict -summary manifests/
+        run: kubeconform -ignore-filename-pattern "kustomization.yaml",".argocd\S+" -strict -summary manifests/
 
       - name: run polaris audit
         # best practice & security audit
@@ -73,19 +73,31 @@ jobs:
         if: always()
         run: find  ./manifests -type f  \( -name '*.yaml' -o  -name '*.yml' \) -exec kube-score score --kubernetes-version v1.20 -o ci {} \;
 
-      - name: kz-check
-        uses: 'anarcher/kustomize-check-action@master'
-        with:
-          # paths is optional. when changes are in this paths, check-action do check it.
-          #paths: |
-          #    base/
-          #    overlay/
-      - uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
-
-
       - uses: stefanzweifel/git-auto-commit-action@v4
         # commit back into branch
         with:
           commit_message: apply kustomize cfg fmt
+
+
+  kustomize-check:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          #ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - uses: webfactory/ssh-agent@v0.5.4
+        if: always()
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: try kustomize
+        run: |
+          COUNT=$(git log --oneline HEAD ^refs/remotes/origin/main  | wc -l)
+          git diff HEAD..HEAD~$COUNT --name-only
+
+
+
