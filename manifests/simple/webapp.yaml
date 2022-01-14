@@ -25,12 +25,12 @@ kind: Service
 metadata:
   name: webapp
 spec:
-  selector:
-    app: webapp
   ports:
   - protocol: TCP
     port: 80
     targetPort: 80
+  selectors:
+    app: webapp
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
