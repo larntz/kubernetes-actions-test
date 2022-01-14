@@ -2,8 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ssh://git@github.com:swimlane/kustomize.git//sre-test/sre-sha/base
-  #- ssh://git@github.com:swimlane/kustomize.git//sre-test/sre-sha/base?ref=sre-test_adding-test-workloads
+  - ssh://git@github.com:Chris-Carmichael/kustomize-remote.git//sre-test/sre-sha/base
 
 commonLabels:
   owner: sre-team
@@ -13,5 +12,5 @@ namespace: sre-sha
 
 images:
   - name: ecr/sre-sha
-    newName: 221643344216.dkr.ecr.us-east-1.amazonaws.com/sre-sha
+    newName: ecr/sre-sha
     newTag: master_33c3c3c3
