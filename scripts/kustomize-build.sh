@@ -7,8 +7,15 @@ for file in $FILES; do
   DIR=$(dirname $file)
   if test -f $DIR/kustomization.yaml; then
     KUST=$DIR/kustomization.yaml
-    echo "found $KUST"
-    kustomize build $DIR >> /dev/null
-    echo $?
+    echo "TESTING : $KUST"
+
+    ERROR=$(kustomize build $DIR 2>&1 > /dev/null)
+
+    if [ $? -eq 0 ]; then 
+      echo "SUCCESS : $KUST"
+    else
+      echo "ERR     : $ERROR"
+      echo "FAILURE : $KUST"
+    fi
   fi
 done
