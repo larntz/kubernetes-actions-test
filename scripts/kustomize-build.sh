@@ -2,6 +2,7 @@
 
 COUNT=$(git log --oneline HEAD ^refs/remotes/origin/main  | wc -l)
 FILES=$(git diff HEAD..HEAD~$COUNT --name-only)
+FAILED=0
 
 for file in $FILES; do
   DIR=$(dirname $file)
@@ -17,6 +18,11 @@ for file in $FILES; do
     else
       echo "ERR     : $ERROR"
       echo "FAILURE : $KUST"
+      FAILED=1
     fi
   fi
 done
+
+if [ $FAILED -eq 1 ]; then
+  exit 1
+fi
