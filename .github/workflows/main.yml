@@ -75,7 +75,7 @@ jobs:
 
     - name: kz-check
       uses: 'anarcher/kustomize-check-action@master'
-      with:
+        #with:
         # paths is optional. when changes are in this paths, check-action do check it.
         #paths: |
         #    base/
