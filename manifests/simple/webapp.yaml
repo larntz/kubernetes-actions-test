@@ -4,12 +4,11 @@ metadata:
   name: webapp
   labels:
     app: webpp
-    test: "yes"
 spec:
-  replicas: 200
+  replicas: 1
   selector:
     matchLabels:
-      app: webapp
+        app: webapp
   template:
     metadata:
       labels:
