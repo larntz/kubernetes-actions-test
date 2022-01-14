@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8,13 +7,6 @@ metadata:
 spec:
   replicas: 1
   selector:
-
-
-
-
-
-
-
     matchLabels:
       app: webapp
   template:
@@ -33,12 +25,12 @@ kind: Service
 metadata:
   name: webapp
 spec:
+  selector:
+    app: webapp
   ports:
   - protocol: TCP
     port: 80
     targetPort: 80
-  selector:
-    app: webapp
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -46,7 +38,7 @@ metadata:
   name: webapp
 spec:
   rules:
-  - host:                 "webapp.127.0.0.1.nip.io"
+  - host: "webapp.127.0.0.1.nip.io"
     http:
       paths:
       - backend:
