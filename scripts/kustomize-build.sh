@@ -13,6 +13,7 @@ for file in $FILES; do
 
     if [ $? -eq 0 ]; then 
       echo "SUCCESS : $KUST"
+      echo ""
     else
       echo "ERR     : $ERROR"
       echo "FAILURE : $KUST"
