@@ -25,7 +25,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.head_ref }}
+          #ref: ${{ github.head_ref }}
           fetch-depth: 0
 
       - name: ls all files in repo
@@ -73,6 +73,16 @@ jobs:
         if: always()
         run: find  ./manifests -type f  \( -name '*.yaml' -o  -name '*.yml' \) -exec kube-score score --kubernetes-version v1.20 -o ci {} \;
 
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        # commit back into branch
+        with:
+          commit_message: apply kustomize cfg fmt
+
+
+  kustomize-check:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+      steps: 
       - uses: webfactory/ssh-agent@v0.5.4
         if: always()
         with:
@@ -86,8 +96,3 @@ jobs:
           #paths: |
           #    base/
           #    overlay/
-
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        # commit back into branch
-        with:
-          commit_message: apply kustomize cfg fmt
