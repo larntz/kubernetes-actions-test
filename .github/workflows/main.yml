@@ -73,8 +73,12 @@ jobs:
         if: always()
         run: find  ./manifests -type f  \( -name '*.yaml' -o  -name '*.yml' \) -exec kube-score score --kubernetes-version v1.20 -o ci {} \;
 
-    - name: kz-check
-      uses: 'anarcher/kustomize-check-action@master'
+      - uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: kz-check
+        uses: 'anarcher/kustomize-check-action@master'
         #with:
         # paths is optional. when changes are in this paths, check-action do check it.
         #        paths: |
