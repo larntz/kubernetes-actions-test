@@ -27,11 +27,8 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          ls -Rt
-          pwd
+      - name: ls all files in repo
+        run: ls -Rt
 
       - name: ansible install some tools
         # install tools 
@@ -39,22 +36,27 @@ jobs:
 
       - name: kustomize cfg fmt
         # formating
+        if: always()
         run: kustomize cfg fmt ./manifests
 
       - name: run kubeval
         # validation
+        if: always()
         run: kubeval --strict --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master -d ./manifests
 
-      - name: run kubeval
+      - name: run kubeconform
         # validation
+        if: always()
         run: kubeconform -strict -summary manifests/
 
       - name: run polaris audit
         # best practice & security audit
+        if: always()
         run: polaris audit --format pretty --audit-path ./manifests
 
       - name: kube-score
         # best practice & security audit
+        if: always()
         run: find  ./manifests -type f  \( -name '*.yaml' -o  -name '*.yml' \) -exec kube-score score --kubernetes-version v1.20 -o ci {} \;
 
 
