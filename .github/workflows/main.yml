@@ -34,23 +34,32 @@ jobs:
           pwd
 
       - name: ansible install some tools
+        # install tools 
         run: ansible-playbook ./playbooks/install-tools.yaml
 
-      - name: run kubeval
-        run: kubeval --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master -d ./manifests
-
-      - name: run polaris audit
-        run: polaris audit --format pretty --audit-path ./manifests
-
       - name: kustomize cfg fmt
+        # formating
         run: kustomize cfg fmt ./manifests
 
-      - name: setup git config
-        run: |
-          # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
+      - name: run kubeval
+        # validation
+        run: kubeval --strict --schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master -d ./manifests
+
+      - name: run kubeval
+        # validation
+        run: kubeconform -strict -summary manifests/
+
+      - name: run polaris audit
+        # best practice & security audit
+        run: polaris audit --format pretty --audit-path ./manifests
+
+      - name: kube-score
+        # best practice & security audit
+        run: find  ./manifests -type f  \( -name '*.yaml' -o  -name '*.yml' \) -exec kube-score score --kubernetes-version v1.20 -o ci {} \;
+
+
 
       - uses: stefanzweifel/git-auto-commit-action@v4
+        # commit back into branch
         with:
           commit_message: apply kustomize cfg fmt

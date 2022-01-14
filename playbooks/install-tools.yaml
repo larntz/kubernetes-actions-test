@@ -21,6 +21,15 @@
           - polaris
         remote_src: true
         mode: '0755'
+    # kubeconform
+    - name: get latest kubeconform
+      unarchive:
+        src: https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
+        dest: /usr/local/bin
+        include: 
+          - kubeconform
+        remote_src: true
+        mode: '0755'
     #
     # These tools have the version in the file so this line needs changed to upgrade :(
     #
@@ -39,7 +48,6 @@
           - kubeaudit
         remote_src: true
         mode: '0755'
-
     #
     # ^^^^ These tools have the version in the file so this line needs changed to upgrade :(
     #
