@@ -30,8 +30,18 @@ jobs:
       - name: ls all files in repo
         run: ls -Rt
 
-      - name: git stuff
-        run: git diff --name-only main ${{ github.head_ref }}
+          # not working.  I think bc I'm only checking out the head_ref
+          #- name: git stuff
+          #  run: git diff --name-only main ${{ github.head_ref }}
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v13.1
+
+      - name: List all changed files
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
 
       - name: ansible install some tools
         # install tools 
