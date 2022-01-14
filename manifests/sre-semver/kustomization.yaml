@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ssh://git@github.com:swimlane/kustomize.git//sre-test/sre-semver/base
+  #- ssh://git@github.com:swimlane/kustomize.git//sre-test/sre-semver/base?ref=sre-test_adding-test-workloads
+
+commonLabels:
+  owner: sre-team
+  environment: dev
+
+namespace: sre-semver
+
+images:
+  - name: 221643344216.dkr.ecr.us-east-1.amazonaws.com/sre-semver
+    newTag: 0.0.2
