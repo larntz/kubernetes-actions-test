@@ -94,8 +94,10 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      - name: Test Clone
+        run: git clone git@github.com:Chris-Carmichael/kustomize-remote.git
+
       - name: kz-check
-        if: always()
         uses: 'anarcher/kustomize-check-action@master'
           # with:
           # paths is optional. when changes are in this paths, check-action do check it.
