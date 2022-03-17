@@ -1,0 +1,30 @@
+traefik:
+  image:
+    name: traefik
+    pullPolicy: IfNotPresent
+  deployment:
+    kind: DaemonSet
+  ingressRoute:
+    dashboard:
+      enabled: false
+  additionalArguments:
+    - "--providers.kubernetesingress.ingressendpoint.hostname=traefik.192.168.200.240.nip.io"
+      #- "--entryPoints.web.forwardedHeaders.trustedIPs=10.244.0.0/16"
+      #- "--entryPoints.websecure.forwardedHeaders.trustedIPs=10.244.0.0/16"
+      #- "--entryPoints.websecure.forwardedHeaders.insecure"
+      #- "--entryPoints.web.forwardedHeaders.insecure"
+      #- "--ping.entryPoint=websecure"
+      #- "--serverstransport.insecureskipverify=true"
+      #  service:
+      #    type: NodePort
+      #  ports:
+      #    web:
+      #      nodePort: 30000
+      #    websecure:
+      #      nodePort: 30001
+      #  nodeSelector:
+      #    ingress-ready: 'true'
+      #  tolerations:
+      #    - key: node-role.kubernetes.io/master
+      #      operator: Equal
+      #      effect: NoSchedule
