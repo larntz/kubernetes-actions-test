@@ -84,7 +84,7 @@ jobs:
         helm_dirs="${{ env.HELM_DIRS }}"
 
         for dir in $helm_dirs; do
-          helm dependency build $dir
+          helm dependency update $dir
           helm template $dir | kubeconform -summary -strict \
             -schema-location default \
             -schema-location "/tmp/schemas/{{ .ResourceKind }}_{{ .ResourceAPIVersion }}.json" \
