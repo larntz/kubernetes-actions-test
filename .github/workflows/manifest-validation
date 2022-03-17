@@ -1,0 +1,93 @@
+name: manifest-validation
+
+on:
+  push:
+    branches:
+      - action-manifest-validation
+      - main
+  pull_request:
+    branches: 
+      - main
+
+jobs:
+  kubeconform:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: install kube tools
+      run: |
+        # kubeconform
+        curl -LO https://github.com/yannh/kubeconform/releases/download/v0.4.12/kubeconform-linux-amd64.tar.gz
+        tar -xzvf kubeconform-linux-amd64.tar.gz kubeconform
+        sudo mv kubeconform /usr/local/bin/
+        rm kubeconform-linux-amd64.tar.gz
+
+    - name: download and convert CRDs
+      run: |
+        # download convert script from kubeconform
+        curl -s -L "https://raw.githubusercontent.com/yannh/kubeconform/v0.4.12/scripts/openapi2jsonschema.py" \
+          -o "$HOME/openapi2jsonschema.py"
+        
+        # install requirements
+        pip install -r https://raw.githubusercontent.com/yannh/kubeconform/v0.4.12/scripts/requirements.txt
+
+        ls -lh "$HOME/"
+
+        # convert CRDs to JSON for kubeconform consumption
+        mkdir /tmp/schemas && cd /tmp/schemas
+        python "$HOME/openapi2jsonschema.py" "https://raw.githubusercontent.com/external-secrets/kubernetes-external-secrets/8.5.0/charts/kubernetes-external-secrets/crds/kubernetes-client.io_externalsecrets_crd.yaml"
+        python "$HOME/openapi2jsonschema.py" "https://raw.githubusercontent.com/argoproj/argo-cd/v2.2.1/manifests/crds/application-crd.yaml"
+
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v13.1
+
+    - name: List all changed files
+      run: |
+        for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          echo "$file was changed"
+        done
+
+    - name: create HELM_DIRS env variable
+      run: |
+        HELM_DIRS=$(for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          DIR=$(dirname $file)
+
+          # check for a Chart.yaml
+          if test -f $DIR/Chart.yaml; then
+            echo $DIR
+          fi
+
+          # check to see if basename folder is templates
+          if [ "$(basename $DIR)" == "templates" ]; then
+            #echo 'found templates directory'
+            workload_dir=$(echo "$DIR" | sed -e "s/\/[^\/]*$//")
+            #echo "$workload_dir"
+            if test -f $workload_dir/Chart.yaml; then
+              echo $workload_dir
+            fi
+          fi
+        done)
+
+        # create HELM_DIRS env var - https://trstringer.com/github-actions-multiline-strings/
+        echo "HELM_DIRS<<EOF" >> $GITHUB_ENV
+        echo "$HELM_DIRS" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    - name: kubeconform helm directories
+      run: |
+        helm_dirs="${{ env.HELM_DIRS }}"
+
+        for dir in $helm_dirs; do
+          helm dependency build $dir
+          helm template $dir | kubeconform -summary -strict \
+            -schema-location default \
+            -schema-location "/tmp/schemas/{{ .ResourceKind }}_{{ .ResourceAPIVersion }}.json" \
+            -kubernetes-version "1.20.11"
+        done
+
